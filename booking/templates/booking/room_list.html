@@ -1,0 +1,148 @@
+{% extends 'booking/base.html' %}
+
+{% block content %}
+<div class="hero-section text-center text-white d-flex align-items-center mb-5" 
+     style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1350&q=80'); 
+            height: 55vh; background-size: cover; background-position: center;">
+    <div class="container animate__animated animate__fadeIn">
+        <h1 class="display-3 fw-bold">Experience Luxury & Comfort</h1>
+        <p class="lead">Book your stay at the most exclusive rooms in the city.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card shadow-lg border-0 mb-5" style="margin-top: -100px; z-index: 10; position: relative; border-radius: 15px;">
+        <div class="card-body p-4">
+            <form method="GET" action="{% url 'booking:RoomList' %}" class="row g-4 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Room Type</label>
+                    <select name="category" class="form-select border-0 bg-light">
+                        <option value="">All Categories</option>
+                        <option value="YAC" {% if current_category == 'YAC' %}selected{% endif %}>AC Rooms</option>
+                        <option value="NAC" {% if current_category == 'NAC' %}selected{% endif %}>Non-AC Rooms</option>
+                        <option value="DEL" {% if current_category == 'DEL' %}selected{% endif %}>Deluxe Suite</option>
+                        <option value="KIN" {% if current_category == 'KIN' %}selected{% endif %}>King Size</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Max Price: $<span id="priceLabel">{{ current_max_price }}</span></label>
+                    <input type="range" name="max_price" class="form-range" min="50" max="1000" step="50" 
+                           value="{{ current_max_price }}" oninput="document.getElementById('priceLabel').innerText = this.value">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold small text-uppercase text-muted">Guests</label>
+                    <input type="number" name="capacity" class="form-control border-0 bg-light" min="1" value="{{ current_capacity }}">
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm rounded-pill">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">Our Featured Rooms</h3>
+        {% if request.GET.category or request.GET.max_price or request.GET.capacity %}
+            <a href="{% url 'booking:RoomList' %}" class="btn btn-sm btn-outline-danger rounded-pill px-3">Reset All Filters</a>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for room in rooms %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm room-card position-relative" style="border-radius: 15px; overflow: hidden;">
+                
+                {% if room.price_per_night < 100 %}
+                <div class="position-absolute top-0 start-0 m-3" style="z-index: 5;">
+                    <span class="badge bg-danger shadow-sm px-3 py-2 rounded-pill animate__animated animate__pulse animate__infinite">
+                        🔥 Last Minute Deal
+                    </span>
+                </div>
+                {% endif %}
+
+                {% if room.image %}
+                    <img src="{{ room.image.url }}" class="card-img-top" alt="Room" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">No Image Available</div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0 fw-bold">Room {{ room.number }}</h5>
+                        <span class="badge bg-soft-primary text-primary border border-primary">{{ room.get_category_display }}</span>
+                    </div>
+                    <p class="text-muted small mb-3">Max Capacity: {{ room.capacity }} Adults | {{ room.beds }} Beds</p>
+                    <hr class="text-muted opacity-25">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="h4 fw-bold text-success">${{ room.price_per_night }}</span>
+                            <span class="text-muted small">/ night</span>
+                        </div>
+                        <a href="{% url 'booking:RoomDetail' room.pk %}" class="btn btn-dark px-4 rounded-pill shadow-sm">Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3"><i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i></div>
+            <h4 class="text-muted">No rooms match your specific filters, vro!</h4>
+            <p class="text-muted">Try increasing your budget or changing the room type.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="bg-light py-5 mt-5 border-top">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">What Our Guests Say</h2>
+            <p class="text-muted">Verified experiences from our luxury suites</p>
+        </div>
+        <div class="row">
+            {% for review in reviews %}
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100 p-4" style="border-radius: 15px;">
+                    <div class="text-warning mb-3 h5">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="text-dark fst-italic mb-4">"{{ review.comment }}"</p>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 45px; height: 45px; font-weight: bold;">
+                            {{ review.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0">{{ review.user.username }}</h6>
+                            <small class="text-muted">Verified Guest</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">No featured reviews yet. Be the first to share your journey!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .room-card { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .room-card:hover { transform: translateY(-12px); box-shadow: 0 1.5rem 4rem rgba(0,0,0,.15)!important; }
+    .bg-soft-primary { background-color: #e7f1ff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .form-range::-webkit-slider-thumb { background: #0d6efd; }
+    .form-control:focus, .form-select:focus { box-shadow: none; border: 1px solid #0d6efd; }
+    
+    /* Animation for the Deal Badge */
+    @keyframes pulse-red {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(220, 53, 69, 0.5); }
+        100% { transform: scale(1); }
+    }
+    .animate__pulse { animation: pulse-red 2s infinite; }
+</style>
+{% endblock %}

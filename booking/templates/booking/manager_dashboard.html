@@ -1,0 +1,48 @@
+{% extends 'booking/base.html' %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Manager Command Center</h2>
+    <div class="row text-white text-center">
+        <div class="col-md-4">
+            <div class="bg-primary p-4 rounded shadow">
+                <h3>{{ total_bookings }}</h3>
+                <p>Total Bookings</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-warning p-4 rounded shadow">
+                <h3>{{ pending_bookings }}</h3>
+                <p>Pending Approvals</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-success p-4 rounded shadow">
+                <h3>${{ total_revenue }}</h3>
+                <p>Total Revenue</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-5">Room Management</h3>
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Room #</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in rooms %}
+            <tr>
+                <td>{{ room.number }}</td>
+                <td>{{ room.get_category_display }}</td>
+                <td>{% if room.is_available %}<span class="text-success">Live</span>{% else %}Inactive{% endif %}</td>
+                <td>${{ room.price_per_night }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

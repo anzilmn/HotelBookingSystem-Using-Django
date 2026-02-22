@@ -1,0 +1,13 @@
+
+{% extends 'booking/base.html' %}
+{% block content %}
+<div class="container w-25">
+    <h2>Join the Club</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success w-100">Create Account</button>
+    </form>
+    <p class="mt-2">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</div>
+{% endblock %}
